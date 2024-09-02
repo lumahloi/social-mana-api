@@ -1,21 +1,6 @@
 const connection = require('../database/connection')
 
 module.exports = {
-    async create(request, response){
-        const { postid } = request.params
-        const userid = request.headers.authorization
-
-        if(!postid || !userid){
-            return response.status(401).json({error: 'Operation not permitted.'})
-        } else {
-            await connection('dislikes').insert({
-                userid,
-                postid
-            })
-            return response.json()
-        }
-    },
-
     async index(request, response) {
         const userid = request.headers.authorization;
         const { postid } = request.params;
@@ -27,7 +12,7 @@ module.exports = {
             .first();
     
         // Verifica se o resultado foi encontrado
-        if (dislikeResult != undefined) {
+        if (dislikeResult) {
             // Ajusta o nome da chave de 'count(*)' para 'count'
             const dislike = {
                 count: parseInt(dislikeResult['count(*)'], 10)
@@ -49,7 +34,35 @@ module.exports = {
             }
             return response.status(200).json(jsonFinal);
         } else {
-            return response.status(404).send();
+            return response.status(404).json("Elemento não encontrado.");
+        }
+    },
+
+    async create(request, response){
+        const { postid } = request.params
+        const userid = request.headers.authorization
+
+        if(!postid || !userid){
+            return response.status(401).json({error: 'Operação não permitida.'})
+        } else {
+            //verificar se postid e userid são validos
+            const postCheck = await connection('posts')
+                .where('postid', postid)
+                .first()
+            
+            const userCheck = await connection('users')
+                .where('userid', userid)
+                .first()
+
+            if(!postCheck || !userCheck){
+                return response.status(401).json({error: 'Operação não permitida.'})
+            } else {
+                await connection('dislikes').insert({
+                    userid,
+                    postid
+                })
+                return response.status(200)
+            }
         }
     },
 
@@ -57,18 +70,40 @@ module.exports = {
         const userid = request.headers.authorization
         const { postid } = request.params
 
-        const undislike = await connection('dislikes')
-            .where('userid', userid)
-            .where('postid', postid)
-            .first()
+        //não ser nulo
+        if(!postid || !userid){ 
+            return response.status(401).json({error: 'Operação não permitida.'})
+        } else {
+            //verificar se postid e userid são válidos
+            const postCheck = await connection('posts')
+                .where('postid', postid)
+                .first()
+            
+            const userCheck = await connection('users')
+                .where('userid', userid)
+                .first()
 
-        if(!undislike){
-            return response.status(401).json({error: 'Operation not permitted.'})
+            if(!postCheck || !userCheck){
+                return response.status(401).json({error: 'Operação não permitida.'})
+            } else {
+                //ver se o dislike existe
+                const undislike = await connection('dislikes')
+                    .where('userid', userid)
+                    .where('postid', postid)
+                    .first()
+
+                if(!undislike){
+                    return response.status(401).json({error: 'Operation not permitted.'})
+                } else {
+                    await connection('dislikes')
+                        .where('userid', userid)
+                        .where('postid', postid)
+                        .first()
+                        .delete()
+
+                    return response.status(200)
+                }
+            }
         }
-
-        await connection('dislikes').where('userid', userid).where('postid', postid).first().delete()
-
-        return response.status(204).send()
     },
-
 }
