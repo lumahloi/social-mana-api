@@ -93,7 +93,7 @@ module.exports = {
                     .first()
 
                 if(!undislike){
-                    return response.status(401).json({error: 'Operation not permitted.'})
+                    return response.status(401).json({error: 'Operação não permitida.'})
                 } else {
                     await connection('dislikes')
                         .where('userid', userid)
