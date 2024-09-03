@@ -12,7 +12,7 @@ module.exports = {
             .first();
     
         // Verifica se o resultado foi encontrado
-        if (likeResult != undefined) {
+        if (!likeResult) {
             // Ajusta o nome da chave de 'count(*)' para 'count'
             const like = {
                 count: parseInt(likeResult['count(*)'], 10)
@@ -33,18 +33,15 @@ module.exports = {
                 jsonFinal = { ...like, liked: false };
             }
             return response.status(200).json(jsonFinal);
-        } else {
-            return response.status(404).json("Elemento não encontrado.")
-        }
+        } 
+        return response.status(400).json("Operação não permitida.")
     },
 
     async create(request, response){
         const { postid } = request.params
         const userid = request.headers.authorization
 
-        if(!postid || !userid){
-            return response.status(401).json({error: 'Operação não permitida.'})
-        } else {
+        if(postid && userid){
             //verificar se postid e userid são validos
             const postCheck = await connection('posts')
                 .where('postid', postid)
@@ -54,9 +51,7 @@ module.exports = {
                 .where('userid', userid)
                 .first()
 
-            if(!postCheck || !userCheck){
-                return response.status(401).json({error: 'Operação não permitida.'})
-            } else {
+            if(postCheck && userCheck){
                 await connection('likes').insert({
                     userid,
                     postid
@@ -64,6 +59,7 @@ module.exports = {
                 return response.status(200)
             }
         }
+        return response.status(400).json({error: 'Operação não permitida.'})
     },
 
     async delete(request, response){
@@ -71,9 +67,7 @@ module.exports = {
         const { postid } = request.params
 
         //não ser nulo
-        if(!postid || !userid){ 
-            return response.status(401).json({error: 'Operação não permitida.'})
-        } else {
+        if(postid && userid){ 
             //verificar se postid e userid são válidos
             const postCheck = await connection('posts')
                 .where('postid', postid)
@@ -83,17 +77,13 @@ module.exports = {
                 .where('userid', userid)
                 .first()
 
-            if(!postCheck || !userCheck){
-                return response.status(401).json({error: 'Operação não permitida.'})
-            } else {
+            if(postCheck && userCheck){
                 const unlike = await connection('likes')
                     .where('userid', userid)
                     .where('postid', postid)
                     .first()
 
-                if(!unlike){
-                    return response.status(401).json({error: 'Operação não permitida.'})
-                } else {
+                if(unlike){
                     await connection('likes')
                         .where('userid', userid)
                         .where('postid', postid)
@@ -104,5 +94,6 @@ module.exports = {
                 }
             }
         }
+        return response.status(400).json({error: 'Operação não permitida.'})
     },
 }

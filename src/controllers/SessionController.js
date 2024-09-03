@@ -10,10 +10,10 @@ module.exports = {
             .first()
 
         if(!userInfo){
-            return response.status(400).json({error: 'No account found with this email'})
+            return response.status(400).json({error: 'Não foi encontrado e-mail esta conta'})
         } else {
             if(password != userInfo.password){
-                return response.status(400).json({error: 'Wrong password, try again'})
+                return response.status(400).json({error: 'Senha inválida, tente novamente.'})
             }
         }
 
