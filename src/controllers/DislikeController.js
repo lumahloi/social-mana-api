@@ -1,4 +1,5 @@
 const connection = require('../database/connection')
+const check = require('./CheckController')
 
 module.exports = {
     async index(request, response) {
@@ -17,8 +18,6 @@ module.exports = {
                     .count()
                     .first();
             
-                // Verifica se o resultado foi encontrado
-                if (dislikeResult) {
                     // Ajusta o nome da chave de 'count(*)' para 'count'
                     const dislike = {
                         count: parseInt(dislikeResult['count(*)'], 10)
@@ -39,7 +38,7 @@ module.exports = {
                         jsonFinal = { ...dislike, disliked: false };
                     }
                     return response.status(200).json(jsonFinal);
-                } 
+                
             }
         }
         return response.status(400).json("Operação não permitida.");
@@ -55,18 +54,26 @@ module.exports = {
             const postCheck = check.check('posts', postid)
 
             if(userCheck && postCheck){
-                //ver se o usuario nao deu like previamente
-                const checkLike = await connection('like')
+                //ver se o usuario nao deu dislike previamente
+                const dislikeCheck = await connection('dislikes')
                     .where('postid', postid)
                     .where('userid', userid)
                     .first()
                 
-                if(!checkLike){
-                    await connection('dislikes').insert({
-                        userid,
-                        postid
-                    })
-                    return response.status(200).json({ message: 'Dado dislike com sucesso.' });
+                if(!dislikeCheck){
+                    //ver se o usuario nao deu like previamente
+                    const checkLike = await connection('likes')
+                        .where('postid', postid)
+                        .where('userid', userid)
+                        .first()
+
+                    if(!checkLike){
+                        await connection('dislikes').insert({
+                            userid,
+                            postid
+                        })
+                        return response.status(200).json({ message: 'Dado dislike com sucesso.' });
+                    }
                 }
             }
         }

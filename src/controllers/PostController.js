@@ -18,7 +18,7 @@ module.exports = {
                     .join('users', 'users.id', '=', 'posts.userid')
                     .limit(9)
                     .offset((page - 1) * 9)
-                    .select(['posts.id', 'posts.description', 'users.name', 'users.picture'])
+                    .select(['posts.id', 'posts.description', 'posts.userid', 'users.name', 'users.picture'])
                     .orderBy('posts.id', 'desc')
                 
                 response.header('X-Total-Count', count['count(*)'])
@@ -55,7 +55,7 @@ module.exports = {
         if(id && userid){
             //ver se ambas informações existem
             const userCheck = check.check('users', userid)
-            const postCheck = check.check('posts', postid)
+            const postCheck = check.check('posts', id)
 
             if(userCheck && postCheck){
                 const post = await connection('posts')
