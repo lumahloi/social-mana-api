@@ -1,4 +1,5 @@
 const connection = require('../database/connection')
+const check = require('./CheckController')
 
 module.exports = {
     async index(request, response){
@@ -41,7 +42,7 @@ module.exports = {
                     description,
                     userid
                 })
-                return response.status(200)
+                return response.status(200).json({ message: 'Post criado com sucesso.' });
             }
         }
         return response.status(400).json({error: 'Operação não permitida.'})
@@ -67,7 +68,7 @@ module.exports = {
                         .where('id', id)
                         .delete()
 
-                    return response.status(200)
+                    return response.status(200).json({ message: 'Post deletado com sucesso' });
                 }
             }
         }

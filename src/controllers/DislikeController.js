@@ -66,7 +66,7 @@ module.exports = {
                         userid,
                         postid
                     })
-                    return response.status(200)
+                    return response.status(200).json({ message: 'Dado dislike com sucesso.' });
                 }
             }
         }
@@ -97,7 +97,7 @@ module.exports = {
                         .first()
                         .delete()
 
-                    return response.status(200)
+                    return response.status(200).json({ message: 'Dislike deletado com sucesso.' });
                 }
             }
         }

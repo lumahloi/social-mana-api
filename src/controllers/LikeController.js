@@ -71,7 +71,7 @@ module.exports = {
                             userid,
                             postid
                         })
-                        return response.status(200)
+                        return response.status(200).json({ message: 'Dado like no post com sucesso.' });
                     }
                 }
             }
@@ -103,7 +103,7 @@ module.exports = {
                         .first()
                         .delete()
 
-                    return response.status(200)
+                    return response.status(200).json({ message: 'Like deletado com sucesso.' });
                 }
             }
         }

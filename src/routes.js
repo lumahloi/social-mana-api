@@ -17,6 +17,7 @@ routes.post('/posts', PostController.create)
 routes.delete('/posts/:id', PostController.delete)
 
 routes.post('/sessions', SessionController.create)
+routes.delete('/sessions', SessionController.delete)
 
 routes.get('/likes/:postid', LikeController.index)     
 routes.post('/likes/:postid', LikeController.create)       
@@ -24,6 +25,6 @@ routes.delete('/likes/:postid', LikeController.delete)
 
 routes.get('/dislikes/:postid', DislikeController.index)   
 routes.post('/dislikes/:postid', DislikeController.create)        
-routes.delete('/dislikes/:postid', DislikeController.delete)           
+routes.delete('/dislikes/:postid', DislikeController.delete)
 
 module.exports = routes;
