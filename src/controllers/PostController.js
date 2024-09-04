@@ -4,12 +4,11 @@ module.exports = {
     async index(request, response){
         const userid = request.headers.authorization
 
-        if(!userid){
-            const userCheck = await connection('users')
-                .where('userid', userid)
-                .first()
+        if(userid){
+            //ver se informaçao existe
+            const userCheck = check.check('users', userid)
 
-            if(!userCheck){
+            if(userCheck){
                 const { page = 1 } = request.query
 
                 const [ count ] = await connection('posts').count()
@@ -26,7 +25,6 @@ module.exports = {
                 return response.json(posts)
             }
         }
-
         return response.status(400).json({error: 'Operação não permitida.'})
     },
 
@@ -34,21 +32,18 @@ module.exports = {
         const { description } = request.body
         const userid = request.headers.authorization
 
-        if(!userid){
-            const userCheck = await connection('users')
-                .where('userid', userid)
-                .first()
+        if(userid && description){
+            //ver se informaçao existe
+            const userCheck = check.check('users', userid)
 
-            if(!userCheck){
-                const [ id ] = await connection('posts').insert({
+            if(userCheck){
+                await connection('posts').insert({
                     description,
                     userid
                 })
-        
                 return response.status(200)
             }
         }
-
         return response.status(400).json({error: 'Operação não permitida.'})
     },
 
@@ -56,12 +51,12 @@ module.exports = {
         const { id } = request.params
         const userid = request.headers.authorization
 
-        const userCheck = await connection('users')
-            .where('userid', userid)
-            .first()
+        if(id && userid){
+            //ver se ambas informações existem
+            const userCheck = check.check('users', userid)
+            const postCheck = check.check('posts', postid)
 
-        if(!id || !userid){
-            if(!userCheck){
+            if(userCheck && postCheck){
                 const post = await connection('posts')
                     .where('id', id)
                     .select('userid')

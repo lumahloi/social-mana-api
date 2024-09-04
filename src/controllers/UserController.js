@@ -1,4 +1,5 @@
 const connection = require('../database/connection')
+const check = require('./CheckController')
 const crypto = require('crypto')
 
 module.exports = {
@@ -20,6 +21,7 @@ module.exports = {
         const id = crypto.randomBytes(4).toString('HEX')
         const newPass = crypto.hash('sha512', password)
         const newEmail = crypto.hash('sha512', email)
+        //fazer validaçao de itens...
 
         await connection('users').insert({
             id,
@@ -36,15 +38,12 @@ module.exports = {
 
         if(authorization == "Kuromi"){
             const { id } = request.params
-    
-            await connection('users')
-                .where('id', id)
-                .select('id')
-                .first()
-    
-            await connection('users').where('id', id).delete()
-    
-            return response.status(200)
+            const userCheck = check.check('users', id)
+            
+            if(userCheck){
+                await connection('users').where('id', id).delete()
+                return response.status(200)
+            }
         }
         return response.status(400).json({error: 'Operação não permitida.'})
     }
