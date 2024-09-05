@@ -7,10 +7,8 @@ exports.up = function(knex) {
       table.increments()
       table.string('description').notNullable()
       table.string('userid').notNullable()
-      table.integer('themeid').notNullable()
       
       table.foreign('userid').references('id').inTable('users')
-      table.foreign('themeid').references('id').inTable('themes')
     })
   
 };

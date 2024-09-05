@@ -18,7 +18,7 @@ module.exports = {
                     .join('users', 'users.id', '=', 'posts.userid')
                     .limit(9)
                     .offset((page - 1) * 9)
-                    .select(['posts.id', 'posts.description', 'posts.userid', 'posts.themeid', 'users.name', 'users.picture'])
+                    .select(['posts.id', 'posts.description', 'posts.userid', 'users.name', 'users.picture'])
                     .orderBy('posts.id', 'desc')
                 
                 response.header('X-Total-Count', count['count(*)'])
@@ -30,19 +30,17 @@ module.exports = {
     },
 
     async create(request, response) {
-        const { description, themeid } = request.body
+        const { description } = request.body
         const userid = request.headers.authorization
 
-        if(userid && description && theme){
+        if(userid && description){
             //ver se informaçao existe
             const userCheck = check.check('users', userid)
-            const themeCheck = check.check('themes', themeid)
 
-            if(userCheck && themeCheck){
+            if(userCheck){
                 await connection('posts').insert({
                     description,
                     userid,
-                    themeid
                 })
                 return response.status(200).json({ message: 'Post criado com sucesso.' });
             }

@@ -5,7 +5,6 @@ const PostController = require('./controllers/PostController')
 const SessionController = require('./controllers/SessionController')
 const LikeController = require('./controllers/LikeController')
 const DislikeController = require('./controllers/DislikeController')
-const ThemeController = require('./controllers/ThemeController')
 
 const routes = express.Router()
 
@@ -25,7 +24,5 @@ routes.delete('/likes/:postid', LikeController.delete)
 routes.get('/dislikes/:postid', DislikeController.index)   
 routes.post('/dislikes/:postid', DislikeController.create)        
 routes.delete('/dislikes/:postid', DislikeController.delete)
-
-routes.get('/themes/', ThemeController.index)
 
 module.exports = routes;
