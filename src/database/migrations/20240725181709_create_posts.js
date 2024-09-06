@@ -7,8 +7,10 @@ exports.up = function(knex) {
       table.increments()
       table.string('description').notNullable()
       table.string('userid').notNullable()
+      table.integer('postid')
       
       table.foreign('userid').references('id').inTable('users')
+      table.foreign('postid').references('id').inTable('posts')
     })
   
 };
