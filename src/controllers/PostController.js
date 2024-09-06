@@ -45,13 +45,30 @@ module.exports = {
                         .count()
             
                     //retornar posts para exibir
-                    posts = await connection('posts')
-                        .join('users', 'users.id', '=', 'posts.userid')
+                    posts = await connection('posts as p1')
+                        .join('users', 'users.id', '=', 'p1.userid')
+                        .leftJoin(
+                            connection('posts as p2')
+                                .select('p2.postid')
+                                .count('p2.id as comment_count')
+                                .groupBy('p2.postid')
+                                .as('comments'),
+                            'comments.postid',
+                            '=',
+                            'p1.id'
+                        )
                         .limit(15)
                         .offset((page - 1) * 15)
-                        .whereRaw('posts.id = posts.postid')
-                        .select(['posts.id', 'posts.description', 'posts.userid', 'users.name', 'users.picture'])
-                        .orderBy('posts.id', 'desc')
+                        .whereRaw('p1.id = p1.postid')
+                        .select([
+                            'p1.id',
+                            'p1.description',
+                            'p1.userid',
+                            'users.name',
+                            'users.picture',
+                            connection.raw('COALESCE(comments.comment_count, 0) - 1 as comment_count')
+                        ])
+                        .orderBy('p1.id', 'desc');
                 }
                 response.header('X-Total-Count', count['count(*)'])
                 return response.json(posts)
