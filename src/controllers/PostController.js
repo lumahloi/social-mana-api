@@ -40,7 +40,7 @@ module.exports = {
             if(userCheck){
                 await connection('posts').insert({
                     description,
-                    userid
+                    userid,
                 })
                 return response.status(200).json({ message: 'Post criado com sucesso.' });
             }
