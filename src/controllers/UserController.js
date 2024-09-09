@@ -26,10 +26,11 @@ module.exports = {
                 const passwordCheck = password.length
 
                 if((nameCheck >= 5 && nameCheck <= 18)&&(emailCheck <= 30)&&(passwordCheck >= 8 && passwordCheck <= 20)){
-                    const regexName = /^[a-zA-Z0-9]*$/
-                    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    const regexName = /^[a-zA-Z0-9]+$/
+                    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                    const regexSpace = /\s/
 
-                    if(!regexName.test(name) && !regexEmail.test(emailCheck)){
+                    if(regexName.test(name) && regexEmail.test(email) && !regexSpace.test(name)){
                         const existingEmail = await connection('users').where('email', email).first()
 
                         if(!existingEmail){

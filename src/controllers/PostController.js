@@ -83,7 +83,7 @@ module.exports = {
         const postid = request.headers.postid
 
         if(userid && description){
-            if(description.trim != ""){
+            if(!description.trim){
                 //ver se informaçao existe
                 const userCheck = await check.check('users', userid)
     
