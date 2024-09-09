@@ -14,7 +14,7 @@ module.exports = {
             const userCheck = await check.check('users', userid)
             let count
             let posts
-
+            
             if(userCheck){
                 const { page = 1 } = request.query
                 if(postid){
