@@ -30,30 +30,34 @@ module.exports = {
                     const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
                     if(!regexName.test(name) || !regexEmail.test(emailCheck)){
-                        const id = crypto.randomBytes(4).toString('HEX');
-                
-                        // Criptografar email e senha em paralelo
-                        const salt = await bcrypt.genSalt(10);
-                        const [hashedPassword] = await Promise.all([
-                            bcrypt.hash(password, salt),
-                        ]);
-                
-                        // Adicionar timeout para a operação de inserção
-                        const insertPromise = connection('users').insert({
-                            id,
-                            name,
-                            email,
-                            password: hashedPassword,
-                            picture
-                        });
-                
-                        const timeoutPromise = new Promise((_, reject) =>
-                            setTimeout(() => reject(new Error('Timeout reached')), 10000) // Timeout de 10 segundos
-                        );
-                
-                        await Promise.race([insertPromise, timeoutPromise]);
-                
-                        return response.status(200).json({ message: 'Usuário criado com sucesso' });
+                        const existingEmail = await connection('users').where('email', email).first()
+
+                        if(!existingEmail){
+                            const id = crypto.randomBytes(4).toString('HEX');
+                    
+                            // Criptografar email e senha em paralelo
+                            const salt = await bcrypt.genSalt(10);
+                            const [hashedPassword] = await Promise.all([
+                                bcrypt.hash(password, salt),
+                            ]);
+                    
+                            // Adicionar timeout para a operação de inserção
+                            const insertPromise = connection('users').insert({
+                                id,
+                                name,
+                                email,
+                                password: hashedPassword,
+                                picture
+                            });
+                    
+                            const timeoutPromise = new Promise((_, reject) =>
+                                setTimeout(() => reject(new Error('Timeout reached')), 10000) // Timeout de 10 segundos
+                            );
+                    
+                            await Promise.race([insertPromise, timeoutPromise]);
+                    
+                            return response.status(200).json({ message: 'Usuário criado com sucesso' });
+                        }
                     }
                 }
             }

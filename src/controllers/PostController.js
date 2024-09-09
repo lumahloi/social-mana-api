@@ -83,35 +83,36 @@ module.exports = {
         const postid = request.headers.postid
 
         if(userid && description){
-            //ver se informaçao existe
-            const userCheck = await check.check('users', userid)
-
-            if(userCheck){
-                const [ id ] = await connection('posts').insert({
-                    description,
-                    userid,
-                }).returning('id')
-
-                if(postid){
-                    const postCheck = await check.check('posts', postid)
-                    if(postCheck){
-                        //se for um comentario
+            if(description.trim != ""){
+                //ver se informaçao existe
+                const userCheck = await check.check('users', userid)
+    
+                if(userCheck){
+                    const [ id ] = await connection('posts').insert({
+                        description,
+                        userid,
+                    }).returning('id')
+    
+                    if(postid){
+                        const postCheck = await check.check('posts', postid)
+                        if(postCheck){
+                            //se for um comentario
+                            await connection('posts')
+                            .where('id', id.id)
+                            .update({
+                                postid: postid 
+                            })
+                        }
+                    } else {
+                        //se for um post
                         await connection('posts')
                         .where('id', id.id)
                         .update({
-                            postid: postid 
+                            postid: id.id  
                         })
                     }
-                } else {
-                    //se for um post
-                    await connection('posts')
-                    .where('id', id.id)
-                    .update({
-                        postid: id.id  
-                    })
+                    return response.status(200).json({message: 'Post criado com sucesso.'});
                 }
-
-                return response.status(200).json({message: 'Post criado com sucesso.'});
             }
         }
         return response.status(400).json({error: 'Operação não permitida.'})
