@@ -3,6 +3,19 @@ const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
 
 module.exports = {
+    async index (request, response) {
+        const authorization = request.headers.authorization
+
+        if(authorization == "Kuromi"){
+            const users = await connection('users')
+                //.select(['users.id', 'users.name'])
+                .select('*')
+
+            return response.json(users)
+        }
+        return response.status(400).json({error: 'Operação não permitida.'})
+    },
+
     async create(request, response) {
         try {
             //checar se email ja existe

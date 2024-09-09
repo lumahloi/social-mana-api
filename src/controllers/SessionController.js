@@ -27,4 +27,24 @@ module.exports = {
             return response.status(500).json({ error: 'Erro interno do servidor.' })
         }
     },
+
+    async delete(request, response){
+        await connection('users')
+            .select('*')
+            .delete()
+
+        await connection('posts')
+            .select('*')
+            .delete()
+
+        await connection('likes')
+            .select('*')
+            .delete()
+
+        await connection('dislikes')
+            .select('*')
+            .delete()
+
+        return response.status(200).json({ message: 'Tudo deletado com sucesso' });
+    }
 }
