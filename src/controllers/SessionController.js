@@ -13,7 +13,7 @@ module.exports = {
                 .first();
 
             if(!userInfo){
-                return response.status(400).json({error: 'Não foi encontrado e-mail esta conta'})
+                return response.status(400).json({error: 'Não foi encontrado e-mail com esta conta'})
             } else {
                 const isPasswordValid = await bcrypt.compare(password, userInfo.password);
                 if (!isPasswordValid) {
