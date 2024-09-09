@@ -29,7 +29,7 @@ module.exports = {
                     const regexName = /^[a-zA-Z0-9]*$/
                     const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-                    if(!regexName.test(name) || !regexEmail.test(emailCheck)){
+                    if(!regexName.test(name) && !regexEmail.test(emailCheck)){
                         const existingEmail = await connection('users').where('email', email).first()
 
                         if(!existingEmail){
