@@ -1,10 +1,10 @@
 // Update with your config settings.
+require("dontenv").config()
 
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
  */
 module.exports = {
-
   development: {
     client: 'sqlite3',
     connection: {
