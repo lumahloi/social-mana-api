@@ -1,4 +1,4 @@
-import connection from '../database/connection.js';
+import { connection } from '../database/connection.js';
 
 export const check = async (tableName, columnName, columnInfo) => {
     try {

@@ -1,4 +1,4 @@
-import connection from '../database/connection.js';
+import { connection } from '../database/connection.js';
 import { check } from './CheckController.js'; // Ajuste a importação de acordo com a exportação
 
 export const UserController = {
