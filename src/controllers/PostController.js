@@ -2,146 +2,99 @@ const connection = require('../database/connection')
 const check = require('./CheckController')
 
 module.exports = {
-    async index(request, response){
+    async index(request, response) {
         const userid = request.headers.authorization
-        const postid = request.headers.postid
 
-        //quando quiser post: postid vai ser nulo
-        //quando quiser comentário: postid vai ter o id do post
-
-        if(userid){
+        if (userid) {
             //ver se informaçao existe
-            const userCheck = await check.check('users', userid)
-            let count
-            let posts
-            
-            if(userCheck){
-                const { page = 1 } = request.query
-                if(postid){
-                    //o post existe?
-                    const postCheck = await check.check('posts', postid)
-        
-                    if(postCheck){
-                        //retornar qt de comms
-                        [ count ] = await connection('posts')
-                        .where('posts.id', '!=', postid)
-                        .andWhere('posts.postid', postid)
-                        .count()
+            const userCheck = await check.check('users', 'id', userid)
 
-                        //comms pra exibir
-                        posts = await connection('posts')
-                            .join('users', 'users.id', '=', 'posts.userid')
-                            .limit(15)
-                            .offset((page - 1) * 15)
-                            .where('posts.id', '!=', postid)
-                            .andWhere('posts.postid', postid)
-                            .select(['posts.id', 'posts.description', 'posts.userid', 'users.name', 'users.picture'])
-                            .orderBy('posts.id', 'desc')
-                    }
-                } else {
-                    //retornar qt de posts
-                    [ count ] = await connection('posts')
-                        .whereRaw('posts.id = posts.postid')
-                        .count()
-            
-                    //retornar posts para exibir
-                    posts = await connection('posts as p1')
-                        .join('users', 'users.id', '=', 'p1.userid')
-                        .leftJoin(
-                            connection('posts as p2')
-                                .select('p2.postid')
-                                .count('p2.id as comment_count')
-                                .groupBy('p2.postid')
-                                .as('comments'),
-                            'comments.postid',
-                            '=',
-                            'p1.id'
-                        )
-                        .limit(15)
-                        .offset((page - 1) * 15)
-                        .whereRaw('p1.id = p1.postid')
-                        .select([
-                            'p1.id',
-                            'p1.description',
-                            'p1.userid',
-                            'users.name',
-                            'users.picture',
-                            connection.raw('COALESCE(comments.comment_count, 0) - 1 as comment_count')
-                        ])
-                        .orderBy('p1.id', 'desc');
+            if (userCheck) {
+                const { page = 1 } = request.query
+
+                function getCount() {
+                    return new Promise((resolve, reject) => {
+                        connection.query("SELECT COUNT(id) FROM posts", function (err, result) {
+                            if (err) {
+                                return reject(err);
+                            }
+                            resolve(result[0]['COUNT(id)']);
+                        });
+                    });
                 }
-                response.header('X-Total-Count', count['count(*)'])
+
+                const count = await getCount()
+
+                function getPosts() {
+                    return new Promise((resolve, reject) => {
+                        connection.query("SELECT P.id, P.description, U.name, U.picture FROM posts as P INNER JOIN users as U ON P.userid = U.id ORDER BY P.id DESC LIMIT 15 OFFSET ?", [(page - 1) * 15], function (err, result) {
+                            if (err) {
+                                console.error(err);
+                                return;
+                            }
+                            resolve(result)
+                        });
+                    })
+                }
+
+                const posts = await getPosts()
+
+                response.header('X-Total-Count', count)
                 return response.json(posts)
             }
         }
-        return response.status(400).json({error: 'Operação não permitida.'})
+        return response.status(400).json({ error: 'Operação não permitida.' })
     },
 
     async create(request, response) {
         const { description } = request.body
         const userid = request.headers.authorization
-        const postid = request.headers.postid
 
-        if(userid && description){
-            if(!description.trim){
+        if (userid && description) {
+            if (description.trim().length > 0) {
                 //ver se informaçao existe
-                const userCheck = await check.check('users', userid)
-    
-                if(userCheck){
-                    const [ id ] = await connection('posts').insert({
-                        description,
-                        userid,
-                    }).returning('id')
-    
-                    if(postid){
-                        const postCheck = await check.check('posts', postid)
-                        if(postCheck){
-                            //se for um comentario
-                            await connection('posts')
-                            .where('id', id.id)
-                            .update({
-                                postid: postid 
-                            })
+                const userCheck = await check.check('users', 'id', userid)
+
+                if (userCheck) {
+                    connection.query("INSERT INTO posts (description, userid) VALUES (?, ?)", [description, userid], function (err) {
+                        if (err) {
+                            console.log(err)
+                            return
                         }
-                    } else {
-                        //se for um post
-                        await connection('posts')
-                        .where('id', id.id)
-                        .update({
-                            postid: id.id  
-                        })
-                    }
-                    return response.status(200).json({message: 'Post criado com sucesso.'});
+                    })
+
+                    return response.status(200).json({ message: 'Post criado com sucesso.' });
                 }
+            } else {
+                return response.status(400).json({ message: 'Insira caracteres válidos.' })
             }
         }
-        return response.status(400).json({error: 'Operação não permitida.'})
+        return response.status(400).json({ message: 'Operação não permitida.' })
     },
 
     async delete(request, response) {
         const { id } = request.params
         const userid = request.headers.authorization
 
-        if(id && userid){
+        if (id && userid) {
             //ver se ambas informações existem
-            const userCheck = await check.check('users', userid)
-            const postCheck = await check.check('posts', id)
+            const userCheck = await check.check('users', 'id', userid)
+            const postCheck = await check.check('posts', 'id', id)
 
-            if(userCheck && postCheck){
-                const post = await connection('posts')
-                    .where('id', id)
-                    .select('userid')
-                    .first()
-
-                if(post.userid == userid){
-                    await connection('posts')
-                        .where('id', id)
-                        .delete()
-
+            if (userCheck && postCheck) {
+                if(postCheck[0].userid == userid){
+                    const deletePromise = connection.query("DELETE FROM posts where id = ?", [id])
+    
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Timeout reached')), 5000) // Timeout de 5 segundos
+                    );
+        
+                    await Promise.race([deletePromise, timeoutPromise]);
+    
                     return response.status(200).json({ message: 'Post deletado com sucesso' });
                 }
             }
         }
-        return response.status(400).json({error: 'Operação não permitida.'})
+        return response.status(400).json({ error: 'Operação não permitida.' })
     }
 }
