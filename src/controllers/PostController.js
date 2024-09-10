@@ -16,7 +16,7 @@ module.exports = {
                     return new Promise((resolve, reject) => {
                         connection.query("SELECT COUNT(id) FROM posts", function (err, result) {
                             if (err) {
-                                return reject(err);
+                                return reject(err)
                             }
                             resolve(result[0]['COUNT(id)']);
                         });
