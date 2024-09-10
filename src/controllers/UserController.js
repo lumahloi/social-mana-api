@@ -1,10 +1,13 @@
-import connection from '../database/connection.js'
-import check from './CheckController.js'
-import bcrypt from 'bcryptjs'
-import crypto from 'crypto'
-import dotenv from 'dotenv'
+import connection from '../database/connection.js';
+import check from './CheckController.js';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
 
-module.exports = {
+// Certifique-se de que dotenv está configurado corretamente em outro lugar do seu código
+dotenv.config();
+
+export const UserController = {
     async create(request, response) {
         const { name, email, password, picture } = request.body;
 
@@ -20,16 +23,21 @@ module.exports = {
 
                 if (regexName.test(name) && regexEmail.test(email) && !regexSpace.test(name)) {
 
-                    const existingEmail = await check.check('users', 'email', email)
-                    if (existingEmail.length == 0) {
+                    const existingEmail = await check.check('users', 'email', email);
+                    if (existingEmail.length === 0) {
                         const id = crypto.randomBytes(4).toString('HEX');
 
                         // Criptografar senha em paralelo
                         const salt = await bcrypt.genSalt(10);
                         const hashedPassword = await bcrypt.hash(password, salt);
 
-                        const insertPromise = connection.query('INSERT INTO users (id, name, email, password, picture) VALUES (?, ?, ?, ?, ?)', [id, name, email, hashedPassword, picture], (err) => {
-                            if (err) throw err
+                        const insertPromise = new Promise((resolve, reject) => {
+                            connection.query('INSERT INTO users (id, name, email, password, picture) VALUES (?, ?, ?, ?, ?)', [id, name, email, hashedPassword, picture], (err) => {
+                                if (err) {
+                                    return reject(err);
+                                }
+                                resolve();
+                            });
                         });
 
                         const timeoutPromise = new Promise((_, reject) =>
@@ -52,4 +60,4 @@ module.exports = {
             return response.status(400).json({ message: 'Insira nome, email e senha.' });
         }
     },
-}
+};
