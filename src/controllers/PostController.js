@@ -1,4 +1,4 @@
-import { connection } from '../database/connection.js';
+import connection from '../database/connection.js';
 import { check } from './CheckController.js'; // Assegure-se de que CheckController.js exporta uma função ou objeto chamado 'check'
 
 export const PostController = {

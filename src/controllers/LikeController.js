@@ -1,4 +1,4 @@
-import { connection } from '../database/connection.js';
+import connection from '../database/connection.js';
 import { check } from './CheckController.js'; // Certifique-se de que CheckController está exportando uma função chamada 'check'
 
 export const UserController = {
