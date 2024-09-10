@@ -1,7 +1,7 @@
-import { check } from './CheckController.js';
+import check from './CheckController.js';
 import bcrypt from 'bcryptjs';
 
-export const AuthController = {
+export const SessionController = {
     async create(request, response) {
         try {
             const { email, password } = request.body;

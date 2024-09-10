@@ -1,7 +1,7 @@
 import connection from '../database/connection.js';
 import { check } from './CheckController.js'; // Ajuste a importação de acordo com a exportação
 
-export const UserController = {
+export const DislikeController = {
     async index(request, response) {
         const userid = request.headers.authorization;
         const { postid } = request.params;
@@ -112,12 +112,12 @@ export const UserController = {
     async delete(request, response) {
         const userid = request.headers.authorization;
         const { postid } = request.params;
-
+    
         if (postid && userid) {
             try {
                 const userCheck = await check('users', 'id', userid);
                 const postCheck = await check('posts', 'id', postid);
-
+    
                 if (userCheck && postCheck) {
                     const getIfDisliked = () => {
                         return new Promise((resolve, reject) => {
@@ -129,9 +129,9 @@ export const UserController = {
                             });
                         });
                     };
-
+    
                     const undislike = await getIfDisliked();
-
+    
                     if (undislike.length > 0 && undislike[0].userid === userid) {
                         const deletePromise = new Promise((resolve, reject) => {
                             connection.query("DELETE FROM dislikes WHERE postid = ? AND userid = ?", [postid, userid], (err) => {
@@ -141,13 +141,13 @@ export const UserController = {
                                 resolve();
                             });
                         });
-
+    
                         const timeoutPromise = new Promise((_, reject) =>
                             setTimeout(() => reject(new Error('Timeout reached')), 5000)
                         );
-
+    
                         await Promise.race([deletePromise, timeoutPromise]);
-
+    
                         return response.status(200).json({ message: 'Dislike deletado com sucesso' });
                     }
                 }
