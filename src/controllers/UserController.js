@@ -1,21 +1,22 @@
 const connection = require('../database/connection')
 const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
+const check = require('./CheckController')
 require('dotenv').config()
 
 module.exports = {
     async index(request, response) {
-        const authorization = request.headers.authorization
+        const authorization = request.headers.authorization;
 
-        if (authorization == process.env.AUTHORIZATION) {
-            connection.query('SELECT * FROM users', (err, rows) => {
+        if (authorization === process.env.AUTHORIZATION) {
+            connection.query('SELECT * FROM users', function (err, result) {
                 if (err) {
-                    return response.status(500).json({ error: 'Erro no servidor.' })
+                    return response.status(500).json({ message: 'Erro no servidor, tente novamente mais tarde.' });
                 }
-                return response.json(rows)
-            })
+                return response.json(result);
+            });
         } else {
-            return response.status(400).json({ error: 'Operação não permitida.' })
+            return response.status(401).json({ message: 'Operação não permitida.' });
         }
     },
 
@@ -33,69 +34,57 @@ module.exports = {
                 const regexSpace = /\s/;
 
                 if (regexName.test(name) && regexEmail.test(email) && !regexSpace.test(name)) {
-                    try {
-                        let existingEmail
-                        connection.query('SELECT * FROM users WHERE email = ?', [email], function (err, result) {
-                            if (err) throw err;
-                            existingEmail = result
+
+                    const existingEmail = await check.check('users', 'email', email)
+                    if (existingEmail.length == 0) {
+                        const id = crypto.randomBytes(4).toString('HEX');
+
+                        // Criptografar senha em paralelo
+                        const salt = await bcrypt.genSalt(10);
+                        const hashedPassword = await bcrypt.hash(password, salt);
+
+                        const insertPromise = connection.query('INSERT INTO users (id, name, email, password, picture) VALUES (?, ?, ?, ?, ?)', [id, name, email, hashedPassword, picture], (err) => {
+                            if (err) throw err
                         });
 
-                        if (!existingEmail.length) {
-                            const id = crypto.randomBytes(4).toString('HEX');
+                        const timeoutPromise = new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('Timeout reached')), 10000) // Timeout de 10 segundos
+                        );
 
-                            // Criptografar email e senha em paralelo
-                            const salt = await bcrypt.genSalt(10);
-                            const hashedPassword = await bcrypt.hash(password, salt);
+                        await Promise.race([insertPromise, timeoutPromise]);
 
-                            const insertPromise = connection.promise().query('INSERT INTO users (name, email, password, picture) VALUES (?, ?, ?, ?)', [name, email, hashedPassword, picture]);
-
-                            const timeoutPromise = new Promise((_, reject) =>
-                                setTimeout(() => reject(new Error('Timeout reached')), 10000) // Timeout de 10 segundos
-                            );
-
-                            await Promise.race([insertPromise, timeoutPromise]);
-
-                            return response.status(200).json({ message: 'Usuário criado com sucesso' });
-                        } else {
-                            return response.status(400).json({ error: 'Email já cadastrado.' });
-                        }
-                    } catch (err) {
-                        return response.status(500).json({ error: 'Erro no servidor.' });
+                        return response.status(200).json({ message: 'Usuário criado com sucesso' });
+                    } else {
+                        return response.status(400).json({ message: 'Email já cadastrado.' });
                     }
                 } else {
-                    return response.status(400).json({ error: 'Insira informações sem caracteres especiais.' });
+                    return response.status(400).json({ message: 'Insira nome sem caracteres especiais e email válido.' });
                 }
             } else {
-                return response.status(400).json({ error: 'Insira informações dentro do limite de caracteres.' });
+                return response.status(400).json({ message: 'Insira informações dentro do limite de caracteres.' });
             }
         } else {
-            return response.status(400).json({ error: 'Insira nome e emails válidos.' });
+            return response.status(400).json({ message: 'Insira nome, email e senha.' });
         }
     },
 
-
     async delete(request, response) {
-        try {
-            const authorization = request.headers.authorization;
+        const authorization = request.headers.authorization;
 
-            if (authorization === "Kuromi") {
-                const { id } = request.params;
+        if (authorization === process.env.AUTHORIZATION) {
+            const { id } = request.params;
 
-                // Adicionar timeout para a operação de exclusão
-                const deletePromise = connection('users').where('id', id).delete();
+            const deletePromise = connection.query("DELETE FROM users WHERE id = ? ", [id])
 
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Timeout reached')), 5000) // Timeout de 5 segundos
-                );
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Timeout reached')), 5000) // Timeout de 5 segundos
+            );
 
-                await Promise.race([deletePromise, timeoutPromise]);
+            await Promise.race([deletePromise, timeoutPromise]);
 
-                return response.status(200).json({ message: 'Usuário deletado com sucesso.' });
-            }
-            return response.status(400).json({ error: 'Operação não permitida.' });
-        } catch (error) {
-            console.error(error);
-            return response.status(500).json({ error: 'Erro interno do servidor.' });
+            return response.status(200).json({ message: 'Usuário deletado com sucesso.' });
         }
+        return response.status(400).json({ message: 'Operação não permitida.' });
+
     }
 }
