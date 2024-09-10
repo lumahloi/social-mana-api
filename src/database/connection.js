@@ -13,4 +13,4 @@ connection.connect((err) => {
   if (err) throw err
 });
 
-module.exports = connection;
+export default connection 
