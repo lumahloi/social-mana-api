@@ -1,5 +1,5 @@
 import connection from '../database/connection.js';
-import check from './CheckController.js';
+import { check } from './CheckController.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import dotenv from 'dotenv';

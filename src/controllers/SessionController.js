@@ -1,4 +1,4 @@
-import check from './CheckController.js';
+import { check } from './CheckController.js';
 import bcrypt from 'bcryptjs';
 
 export const AuthController = {

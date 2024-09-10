@@ -1,6 +1,6 @@
 import connection from '../database/connection.js';
 
-const check = async (tableName, columnName, columnInfo) => {
+export const check = async (tableName, columnName, columnInfo) => {
     try {
         const query = `SELECT * FROM ?? WHERE ?? = ?`;
         const values = [tableName, columnName, columnInfo];
@@ -17,5 +17,3 @@ const check = async (tableName, columnName, columnInfo) => {
         throw new Error('Erro ao executar a consulta: ' + error.message);
     }
 };
-
-export default { check };
