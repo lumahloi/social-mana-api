@@ -1,5 +1,4 @@
-import connection from '../database/connection'
-import check from './CheckController'
+import check from './CheckController.js'
 import bcrypt from 'bcryptjs'
 
 module.exports = {

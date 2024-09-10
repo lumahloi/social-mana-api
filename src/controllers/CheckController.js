@@ -1,4 +1,4 @@
-import connection from '../database/connection';
+import connection from '../database/connection.js';
 
 module.exports = {
     async check(tableName, columnName, columnInfo) {

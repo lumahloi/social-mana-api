@@ -1,5 +1,5 @@
-import connection from '../database/connection'
-import check from './CheckController'
+import connection from '../database/connection.js'
+import check from './CheckController.js'
 
 module.exports = {
     async index(request, response) {
