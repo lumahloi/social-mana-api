@@ -1,4 +1,4 @@
-const connection = require('../database/connection')
+import connection from '../database/connection';
 
 module.exports = {
     async check(tableName, columnName, columnInfo) {

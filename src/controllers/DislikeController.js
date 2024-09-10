@@ -1,5 +1,5 @@
-const connection = require('../database/connection')
-const check = require('./CheckController')
+import connection from '../database/connection';
+import check from './CheckController'
 
 module.exports = {
     async index(request, response) {

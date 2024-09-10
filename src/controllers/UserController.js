@@ -1,8 +1,8 @@
-const connection = require('../database/connection')
-const crypto = require('crypto')
-const bcrypt = require('bcryptjs')
-const check = require('./CheckController')
-require('dotenv').config()
+import connection from '../database/connection'
+import check from './CheckController'
+import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
+import dotenv from 'dotenv'
 
 module.exports = {
     async create(request, response) {

@@ -1,10 +1,10 @@
-const express = require('express')
+import express from 'express'
 
-const UserController = require('./controllers/UserController')
-const PostController = require('./controllers/PostController')
-const SessionController = require('./controllers/SessionController')
-const LikeController = require('./controllers/LikeController')
-const DislikeController = require('./controllers/DislikeController')
+import UserController from './controllers/UserController'
+import PostController from './controllers/PostController'
+import SessionController from './controllers/SessionController'
+import LikeController from './controllers/LikeController'
+import DislikeController from './controllers/DislikeController'
 
 const routes = express.Router()
 

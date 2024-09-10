@@ -1,6 +1,6 @@
-const connection = require('../database/connection')
-const bcrypt = require('bcryptjs')
-const check = require('./CheckController')
+import connection from '../database/connection'
+import check from './CheckController'
+import bcrypt from 'bcryptjs'
 
 module.exports = {
     async create (request, response) {
