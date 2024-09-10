@@ -5,21 +5,6 @@ const check = require('./CheckController')
 require('dotenv').config()
 
 module.exports = {
-    async index(request, response) {
-        const authorization = request.headers.authorization;
-
-        if (authorization === process.env.AUTHORIZATION) {
-            connection.query('SELECT * FROM users', function (err, result) {
-                if (err) {
-                    return response.status(500).json({ message: 'Erro no servidor, tente novamente mais tarde.' });
-                }
-                return response.json(result);
-            });
-        } else {
-            return response.status(401).json({ message: 'Operação não permitida.' });
-        }
-    },
-
     async create(request, response) {
         const { name, email, password, picture } = request.body;
 
@@ -67,24 +52,4 @@ module.exports = {
             return response.status(400).json({ message: 'Insira nome, email e senha.' });
         }
     },
-
-    async delete(request, response) {
-        const authorization = request.headers.authorization;
-
-        if (authorization === process.env.AUTHORIZATION) {
-            const { id } = request.params;
-
-            const deletePromise = connection.query("DELETE FROM users WHERE id = ? ", [id])
-
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Timeout reached')), 5000) // Timeout de 5 segundos
-            );
-
-            await Promise.race([deletePromise, timeoutPromise]);
-
-            return response.status(200).json({ message: 'Usuário deletado com sucesso.' });
-        }
-        return response.status(400).json({ message: 'Operação não permitida.' });
-
-    }
 }

@@ -23,33 +23,4 @@ module.exports = {
             return response.status(500).json({ error: 'Erro interno do servidor.' })
         }
     },
-
-    async delete(response){
-        connection.query("DELETE * FROM users", function (err) {
-            if (err)
-                return err
-        })
-
-        connection.query("DELETE * FROM posts", function (err) {
-            if (err)
-                return err
-        })
-
-        connection.query("DELETE * FROM likes", function (err) {
-            if (err)
-                return err
-        })
-
-        connection.query("DELETE * FROM dislikes", function (err) {
-            if (err)
-                return err
-        })
-
-        connection.query("DELETE * FROM comments", function (err) {
-            if (err)
-                return err
-        })
-
-        return response.status(200).json({ message: 'Tudo deletado com sucesso' });
-    }
 }
