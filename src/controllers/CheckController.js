@@ -11,7 +11,6 @@ module.exports = {
                     if (err) {
                         return reject(err);
                     }
-                    console.log(result)
                     resolve(result);
                 });
             });
