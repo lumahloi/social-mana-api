@@ -1,12 +1,10 @@
-import connection from '../database/connection.js';
-
-export const check = async (tableName, columnName, columnInfo) => {
+export const check = async (tableName, columnName, columnInfo, connection) => {
     try {
         const query = `SELECT * FROM ?? WHERE ?? = ?`;
         const values = [tableName, columnName, columnInfo];
 
         return new Promise((resolve, reject) => {
-            connection.query(query, values, function (err, result) {
+            connection.execute(query, values, function (err, result) {
                 if (err) {
                     return reject(err);
                 }

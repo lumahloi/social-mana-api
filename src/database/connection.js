@@ -20,4 +20,4 @@ const createConnection = async () => {
   }
 };
 
-export default createConnection();
+export default createConnection;

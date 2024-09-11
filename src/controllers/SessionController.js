@@ -1,11 +1,17 @@
+import createConnection from '../database/connection.js';
 import { check } from './CheckController.js';
 import bcrypt from 'bcryptjs';
 
 export const SessionController = {
     async create(request, response) {
+        let connection;
         try {
             const { email, password } = request.body;
-            const userInfo = await check('users', 'email', email);
+
+            connection = await createConnection();
+            
+            // Usa a conexão para o check
+            const userInfo = await check('users', 'email', email, connection);
 
             if (userInfo.length === 0) {
                 return response.status(400).json({ error: 'Não foi encontrado e-mail com esta conta' });
@@ -20,6 +26,10 @@ export const SessionController = {
         } catch (error) {
             console.error(error);
             return response.status(500).json({ error: 'Erro interno do servidor.' });
+        } finally {
+            if (connection) {
+                await connection.end();
+            }
         }
     },
 };

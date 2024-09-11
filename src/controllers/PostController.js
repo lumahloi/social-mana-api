@@ -1,41 +1,30 @@
-import connection from '../database/connection.js';
-import { check } from './CheckController.js'; // Assegure-se de que CheckController.js exporta uma função ou objeto chamado 'check'
+import createConnection from '../database/connection.js';
+import { check } from './CheckController.js';
 
 export const PostController = {
     async index(request, response) {
         const userid = request.headers.authorization;
 
         if (userid) {
+            let connection;
             try {
-                // Verifica se a informação existe
-                const userCheck = await check('users', 'id', userid);
+                const userCheck = await check('users', 'id', userid, connection);
 
                 if (userCheck) {
                     const { page = 1 } = request.query;
 
-                    const getCount = () => {
-                        return new Promise((resolve, reject) => {
-                            connection.query("SELECT COUNT(id) FROM posts", (err, result) => {
-                                if (err) {
-                                    return reject(err);
-                                }
-                                resolve(result[0]['COUNT(id)']);
-                            });
-                        });
+                    connection = await createConnection();
+
+                    const getCount = async () => {
+                        const [rows] = await connection.execute("SELECT COUNT(id) FROM posts");
+                        return rows[0]['COUNT(id)'];
                     };
 
                     const count = await getCount();
 
-                    const getPosts = () => {
-                        return new Promise((resolve, reject) => {
-                            connection.query("SELECT P.id, P.description, U.name, U.picture FROM posts as P INNER JOIN users as U ON P.userid = U.id ORDER BY P.id DESC LIMIT 15 OFFSET ?", [(page - 1) * 15], (err, result) => {
-                                if (err) {
-                                    console.error(err);
-                                    return reject(err);
-                                }
-                                resolve(result);
-                            });
-                        });
+                    const getPosts = async () => {
+                        const [rows] = await connection.execute("SELECT P.id, P.description, U.name, U.picture FROM posts as P INNER JOIN users as U ON P.userid = U.id ORDER BY P.id DESC LIMIT 15 OFFSET ?", [(page - 1) * 15]);
+                        return rows;
                     };
 
                     const posts = await getPosts();
@@ -46,6 +35,10 @@ export const PostController = {
             } catch (error) {
                 console.error(error);
                 return response.status(500).json({ error: 'Erro no servidor, tente novamente mais tarde.' });
+            } finally {
+                if (connection) {
+                    await connection.end();
+                }
             }
         }
         return response.status(400).json({ error: 'Operação não permitida.' });
@@ -57,23 +50,22 @@ export const PostController = {
 
         if (userid && description) {
             if (description.trim().length > 0) {
+                let connection;
                 try {
-                    // Verifica se a informação existe
-                    const userCheck = await check('users', 'id', userid);
+                    const userCheck = await check('users', 'id', userid, connection);
 
                     if (userCheck) {
-                        connection.query("INSERT INTO posts (description, userid) VALUES (?, ?)", [description, userid], (err) => {
-                            if (err) {
-                                console.log(err);
-                                return response.status(500).json({ message: 'Erro ao criar o post.' });
-                            }
-                        });
-
+                        connection = await createConnection();
+                        await connection.execute("INSERT INTO posts (description, userid) VALUES (?, ?)", [description, userid]);
                         return response.status(200).json({ message: 'Post criado com sucesso.' });
                     }
                 } catch (error) {
                     console.error(error);
                     return response.status(500).json({ error: 'Erro no servidor, tente novamente mais tarde.' });
+                } finally {
+                    if (connection) {
+                        await connection.end();
+                    }
                 }
             } else {
                 return response.status(400).json({ message: 'Insira caracteres válidos.' });
@@ -87,21 +79,16 @@ export const PostController = {
         const userid = request.headers.authorization;
 
         if (id && userid) {
+            let connection;
             try {
-                // Verifica se ambas informações existem
-                const userCheck = await check('users', 'id', userid);
-                const postCheck = await check('posts', 'id', id);
+                const userCheck = await check('users', 'id', userid, connection);
+                const postCheck = await check('posts', 'id', id, connection);
 
                 if (userCheck && postCheck) {
                     if (postCheck[0].userid === userid) {
-                        const deletePromise = new Promise((resolve, reject) => {
-                            connection.query("DELETE FROM posts WHERE id = ?", [id], (err) => {
-                                if (err) {
-                                    return reject(err);
-                                }
-                                resolve();
-                            });
-                        });
+                        connection = await createConnection();
+
+                        const deletePromise = connection.execute("DELETE FROM posts WHERE id = ?", [id]);
 
                         const timeoutPromise = new Promise((_, reject) =>
                             setTimeout(() => reject(new Error('Timeout reached')), 5000) // Timeout de 5 segundos
@@ -115,6 +102,10 @@ export const PostController = {
             } catch (error) {
                 console.error(error);
                 return response.status(500).json({ error: 'Erro no servidor, tente novamente mais tarde.' });
+            } finally {
+                if (connection) {
+                    await connection.end();
+                }
             }
         }
         return response.status(400).json({ error: 'Operação não permitida.' });
