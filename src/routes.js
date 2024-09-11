@@ -1,10 +1,10 @@
 import express from 'express';
 
-import UserController from './controllers/UserController.js';
-import PostController from './controllers/PostController.js';
-import SessionController from './controllers/SessionController.js';
-import LikeController from './controllers/LikeController.js';
-import DislikeController from './controllers/DislikeController.js';
+import { UserController } from './controllers/UserController.js';
+import { PostController } from './controllers/PostController.js';
+import { SessionController } from './controllers/SessionController.js';
+import { LikeController } from './controllers/LikeController.js';
+import { DislikeController } from './controllers/DislikeController.js';
 
 const routes = express.Router();
 
