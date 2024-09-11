@@ -9,12 +9,14 @@ export const DislikeController = {
         if (userid && postid) {
             let connection;
             try {
+                connection = await createConnection();
+
+                // Verificar usuário e post
                 const userCheck = await check('users', 'id', userid, connection);
                 const postCheck = await check('posts', 'id', postid, connection);
 
                 if (userCheck && postCheck) {
-                    connection = await createConnection();
-
+                    // Contar dislikes
                     const getDisLikeQt = async () => {
                         const [rows] = await connection.execute("SELECT COUNT(id) AS count FROM dislikes WHERE postid = ?", [postid]);
                         return rows[0]['count'];
@@ -22,6 +24,7 @@ export const DislikeController = {
 
                     const count = await getDisLikeQt();
 
+                    // Verificar se o usuário já deu dislike
                     const getIfDisliked = async () => {
                         const [rows] = await connection.execute("SELECT id FROM dislikes WHERE userid = ? AND postid = ?", [userid, postid]);
                         return rows;
@@ -57,14 +60,16 @@ export const DislikeController = {
         if (postid && userid) {
             let connection;
             try {
+                connection = await createConnection();
+
+                // Verificar usuário e post
                 const userCheck = await check('users', 'id', userid, connection);
                 const postCheck = await check('posts', 'id', postid, connection);
 
                 if (postCheck && userCheck) {
-                    connection = await createConnection();
-
+                    // Verificar se o usuário já interagiu com o post
                     const checkIfAlreadyInteracted = async (tableName) => {
-                        const [rows] = await connection.execute("SELECT * FROM ?? WHERE postid = ? AND userid = ?", [tableName, postid, userid]);
+                        const [rows] = await connection.execute("SELECT * FROM " + tableName + " WHERE postid = ? AND userid = ?", [postid, userid]);
                         return rows;
                     };
 
@@ -105,12 +110,14 @@ export const DislikeController = {
         if (postid && userid) {
             let connection;
             try {
-                const userCheck = await check('users', 'id', userid, connection)
-                const postCheck = await check('posts', 'id', postid, connection)
+                connection = await createConnection();
+
+                // Verificar usuário e post
+                const userCheck = await check('users', 'id', userid, connection);
+                const postCheck = await check('posts', 'id', postid, connection);
 
                 if (userCheck && postCheck) {
-                    connection = await createConnection();
-
+                    // Verificar se o usuário deu dislike
                     const getIfDisliked = async () => {
                         const [rows] = await connection.execute("SELECT * FROM dislikes WHERE userid = ? AND postid = ?", [userid, postid]);
                         return rows;

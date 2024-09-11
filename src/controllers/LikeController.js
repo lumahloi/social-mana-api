@@ -9,12 +9,14 @@ export const LikeController = {
         if (userid && postid) {
             let connection;
             try {
+                connection = await createConnection();
+
+                // Verificar usuário e post
                 const userCheck = await check('users', 'id', userid, connection);
                 const postCheck = await check('posts', 'id', postid, connection);
 
                 if (userCheck && postCheck) {
-                    connection = await createConnection();
-
+                    // Contar likes
                     const getLikeQt = async () => {
                         const [rows] = await connection.execute("SELECT COUNT(id) AS count FROM likes WHERE postid = ?", [postid]);
                         return rows[0]['count'];
@@ -22,6 +24,7 @@ export const LikeController = {
 
                     const count = await getLikeQt();
 
+                    // Verificar se o usuário já deu like
                     const getIfLiked = async () => {
                         const [rows] = await connection.execute("SELECT id FROM likes WHERE userid = ? AND postid = ?", [userid, postid]);
                         return rows;
@@ -56,14 +59,17 @@ export const LikeController = {
         if (postid && userid) {
             let connection;
             try {
+                connection = await createConnection();
+
+                // Verificar usuário e post
                 const userCheck = await check('users', 'id', userid, connection);
                 const postCheck = await check('posts', 'id', postid, connection);
 
                 if (postCheck && userCheck) {
-                    connection = await createConnection();
-
+                    // Verificar se o usuário já interagiu com o post
                     const checkIfAlreadyInteracted = async (tableName) => {
-                        const [rows] = await connection.execute("SELECT * FROM ?? WHERE postid = ? AND userid = ?", [tableName, postid, userid]);
+                        const query = `SELECT * FROM ${tableName} WHERE postid = ? AND userid = ?`;
+                        const [rows] = await connection.execute(query, [postid, userid]);
                         return rows;
                     };
 
@@ -104,12 +110,14 @@ export const LikeController = {
         if (postid && userid) {
             let connection;
             try {
+                connection = await createConnection();
+
+                // Verificar usuário e post
                 const userCheck = await check('users', 'id', userid, connection);
                 const postCheck = await check('posts', 'id', postid, connection);
 
                 if (userCheck && postCheck) {
-                    connection = await createConnection();
-
+                    // Verificar se o usuário deu like
                     const getIfLiked = async () => {
                         const [rows] = await connection.execute("SELECT * FROM likes WHERE userid = ? AND postid = ?", [userid, postid]);
                         return rows;
