@@ -11,7 +11,7 @@ export const SessionController = {
             connection = await createConnection();
             
             // Usa a conexão para o check
-            const userInfo = await check('users', 'email', email, connection);
+            const userInfo = await check('users', 'email', email);
 
             if (userInfo.length === 0) {
                 return response.status(400).json({ error: 'Não foi encontrado e-mail com esta conta' });

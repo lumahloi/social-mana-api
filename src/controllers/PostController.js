@@ -8,7 +8,7 @@ export const PostController = {
         if (userid) {
             let connection;
             try {
-                const userCheck = await check('users', 'id', userid, connection);
+                const userCheck = await check('users', 'id', userid);
 
                 if (userCheck) {
                     const { page = 1 } = request.query;
@@ -52,7 +52,7 @@ export const PostController = {
             if (description.trim().length > 0) {
                 let connection;
                 try {
-                    const userCheck = await check('users', 'id', userid, connection);
+                    const userCheck = await check('users', 'id', userid);
 
                     if (userCheck) {
                         connection = await createConnection();
@@ -81,8 +81,8 @@ export const PostController = {
         if (id && userid) {
             let connection;
             try {
-                const userCheck = await check('users', 'id', userid, connection);
-                const postCheck = await check('posts', 'id', id, connection);
+                const userCheck = await check('users', 'id', userid);
+                const postCheck = await check('posts', 'id', id);
 
                 if (userCheck && postCheck) {
                     if (postCheck[0].userid === userid) {

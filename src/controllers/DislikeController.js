@@ -12,8 +12,8 @@ export const DislikeController = {
                 connection = await createConnection();
 
                 // Verificar usuário e post
-                const userCheck = await check('users', 'id', userid, connection);
-                const postCheck = await check('posts', 'id', postid, connection);
+                const userCheck = await check('users', 'id', userid);
+                const postCheck = await check('posts', 'id', postid);
 
                 if (userCheck && postCheck) {
                     // Contar dislikes
@@ -63,8 +63,8 @@ export const DislikeController = {
                 connection = await createConnection();
 
                 // Verificar usuário e post
-                const userCheck = await check('users', 'id', userid, connection);
-                const postCheck = await check('posts', 'id', postid, connection);
+                const userCheck = await check('users', 'id', userid);
+                const postCheck = await check('posts', 'id', postid);
 
                 if (postCheck && userCheck) {
                     // Verificar se o usuário já interagiu com o post
@@ -113,8 +113,8 @@ export const DislikeController = {
                 connection = await createConnection();
 
                 // Verificar usuário e post
-                const userCheck = await check('users', 'id', userid, connection);
-                const postCheck = await check('posts', 'id', postid, connection);
+                const userCheck = await check('users', 'id', userid);
+                const postCheck = await check('posts', 'id', postid);
 
                 if (userCheck && postCheck) {
                     // Verificar se o usuário deu dislike

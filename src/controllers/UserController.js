@@ -27,7 +27,7 @@ export const UserController = {
                         connection = await createConnection();
 
                         // Verificar se o email já está cadastrado
-                        const existingEmail = await check('users', 'email', email, connection);
+                        const existingEmail = await check('users', 'email', email);
                         if (existingEmail.length === 0) {
                             const id = crypto.randomBytes(4).toString('HEX');
 

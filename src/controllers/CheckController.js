@@ -1,15 +1,17 @@
-export const check = async (tableName, columnName, columnInfo, connection) => {
+import createConnection from '../database/connection.js';
+
+export const check = async (tableName, columnName, columnInfo) => {
+    let connection;
     try {
-        // Corrigido para usar placeholders corretos
-        const query = `SELECT * FROM ?? WHERE ?? = ?`;
-        const values = [tableName, columnName, columnInfo];
-
-        // Executar a consulta com placeholders corretos
-        const [rows] = await connection.execute(query, values);
-
+        connection = await createConnection();
+        const query = `SELECT * FROM ${tableName} WHERE ${columnName} = ?`;
+        const [rows] = await connection.execute(query, [columnInfo]);
         return rows;
     } catch (error) {
-        console.error('Erro ao executar a consulta:', error.message);
         throw new Error('Erro ao executar a consulta: ' + error.message);
+    } finally {
+        if (connection) {
+            await connection.end();
+        }
     }
 };
