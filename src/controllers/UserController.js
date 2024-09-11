@@ -23,7 +23,7 @@ export const UserController = {
 
                 if (regexName.test(name) && regexEmail.test(email) && !regexSpace.test(name)) {
 
-                    const existingEmail = await check.check('users', 'email', email);
+                    const existingEmail = await check('users', 'email', email);
                     if (existingEmail.length === 0) {
                         const id = crypto.randomBytes(4).toString('HEX');
 

@@ -5,7 +5,7 @@ export const SessionController = {
     async create(request, response) {
         try {
             const { email, password } = request.body;
-            const userInfo = await check.check('users', 'email', email);
+            const userInfo = await check('users', 'email', email);
 
             if (userInfo.length === 0) {
                 return response.status(400).json({ error: 'Não foi encontrado e-mail com esta conta' });
