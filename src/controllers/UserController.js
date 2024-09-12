@@ -74,18 +74,17 @@ export const UserController = {
     //     }
     // },
 
-    async create() {
+    async create(request, response) {
         let connection
 
         try {
             connection = await createConnection();
             const insertPromise = new Promise((resolve, reject) => {
-                connection.query('DROP TABLE users; DROP TABLE posts; DROP TABLE likes; DROP TABLE dislikes;', (err) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    resolve();
-                });
+                connection.query('DROP TABLE IF EXISTS users', (err) => { return err });
+                connection.query('DROP TABLE IF EXISTS posts', (err) => { /* handle error */ return err});
+                connection.query('DROP TABLE IF EXISTS likes', (err) => { /* handle error */ return err});
+                connection.query('DROP TABLE IF EXISTS dislikes', (err) => { /* handle error */ return err});
+
             });
 
             const timeoutPromise = new Promise((_, reject) =>
