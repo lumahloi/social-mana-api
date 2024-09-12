@@ -1,55 +1,66 @@
-const connection = require('../database/connection')
-const bcrypt = require('bcryptjs')
-const check = require('./CheckController')
+import createConnection from '../database/connection.js'
+import { check } from './CheckController.js'
+import bcrypt from 'bcryptjs'
 
-module.exports = {
-    async create (request, response) {
+export const SessionController = {
+    async create(request, response) {
+        const { email, password } = request.body
+
+        if (!email || !password) {
+            return response.status(400).json({ error: 'E-mail e senha são obrigatórios.' })
+        }
+
+        let connection
         try {
-            const { email, password } = request.body
-            const userInfo = await check.check('users', 'email', email)
+            connection = await createConnection()
 
-            if(userInfo.length == 0){
-                return response.status(400).json({error: 'Não foi encontrado e-mail com esta conta'})
-            } else {
-                const isPasswordValid = await bcrypt.compare(password, userInfo[0].password);
-                if (!isPasswordValid) {
-                    return response.status(400).json({ error: 'Senha inválida, tente novamente.' });
-                }
+            // Verificar se o e-mail está registrado
+            const userInfo = await check('users', 'email', email)
+
+            if (userInfo.length === 0) {
+                return response.status(400).json({ error: 'E-mail não encontrado.' })
             }
+
+            const isPasswordValid = await bcrypt.compare(password, userInfo[0].password)
+
+            if (!isPasswordValid) {
+                return response.status(400).json({ error: 'Senha inválida, tente novamente.' })
+            }
+
+            // Retornar as informações do usuário
             const { id, name, picture } = userInfo[0]
-            return response.json({id, name, picture})
-        } catch (e) {
-            console.error(error);
-            return response.status(500).json({ error: 'Erro interno do servidor.' })
+            return response.json({ id, name, picture })
+
+        } catch (error) {
+            console.error(error)
+            return response.status(500).json({ error: 'Erro no servidor, tente novamente mais tarde.' })
+        } finally {
+            if (connection) {
+                await connection.end()
+            }
         }
     },
 
-    async delete(response){
-        connection.query("DELETE * FROM users", function (err) {
-            if (err)
-                return err
-        })
+    async delete(request, response){
+        let connection
+        try {
+            connection = await createConnection()
 
-        connection.query("DELETE * FROM posts", function (err) {
-            if (err)
-                return err
-        })
+            // Deletar dados das tabelas
+            await connection.execute("DELETE FROM users")
+            await connection.execute("DELETE FROM posts")
+            await connection.execute("DELETE FROM likes")
+            await connection.execute("DELETE FROM dislikes")
+            await connection.execute("DELETE FROM comments")
 
-        connection.query("DELETE * FROM likes", function (err) {
-            if (err)
-                return err
-        })
-
-        connection.query("DELETE * FROM dislikes", function (err) {
-            if (err)
-                return err
-        })
-
-        connection.query("DELETE * FROM comments", function (err) {
-            if (err)
-                return err
-        })
-
-        return response.status(200).json({ message: 'Tudo deletado com sucesso' });
+            return response.status(200).json({ message: 'Tudo deletado com sucesso' })
+        } catch (error) {
+            console.error(error)
+            return response.status(500).json({ error: 'Erro no servidor, tente novamente mais tarde.' })
+        } finally {
+            if (connection) {
+                await connection.end()
+            }
+        }
     }
 }
