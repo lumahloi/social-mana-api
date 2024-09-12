@@ -13,7 +13,7 @@ export const PostController = {
         try {
             const userCheck = await check('users', 'id', userid);
 
-            if (!userCheck) {
+            if (userCheck.length === 0) {
                 return response.status(400).json({ error: 'Usuário não encontrado.' });
             }
 
