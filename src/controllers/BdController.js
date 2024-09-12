@@ -1,5 +1,5 @@
 import createConnection from '../database/connection.js';
-export const BdUserController = {
+export const BdController = {
     async index(response) {
         let connection;
         try {
