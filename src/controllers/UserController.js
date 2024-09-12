@@ -1,7 +1,7 @@
-import createConnection from '../database/connection.js'
-import { check } from './CheckController.js'
-import bcrypt from 'bcryptjs'
-import crypto from 'crypto'
+import createConnection from '../database/connection.js';
+import { check } from './CheckController.js';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 export const UserController = {
     async create(request, response) {
@@ -22,32 +22,21 @@ export const UserController = {
                     const regexSpace = /\s/;
 
                     if (regexName.test(name) && regexEmail.test(email) && !regexSpace.test(name)) {
-                        connection = await createConnection();
 
                         // Verificar se o email já está cadastrado
                         const existingEmail = await check('users', 'email', email);
                         if (existingEmail.length === 0) {
-                            const id = crypto.randomBytes(4).toString('HEX');
+                            const id = crypto.randomBytes(4).toString('hex');  // Use 'hex' para o ID corretamente
 
                             // Criptografar senha
                             const salt = await bcrypt.genSalt(10);
                             const hashedPassword = await bcrypt.hash(password, salt);
 
                             // Inserir novo usuário
-                            const insertPromise = new Promise((resolve, reject) => {
-                                connection.query('INSERT INTO users (id, name, email, password, picture) VALUES (?, ?, ?, ?, ?)', [id, name, email, hashedPassword, picture], (err) => {
-                                    if (err) {
-                                        return reject(err);
-                                    }
-                                    resolve();
-                                });
-                            });
-
-                            const timeoutPromise = new Promise((_, reject) =>
-                                setTimeout(() => reject(new Error('Timeout reached')), 10000) // Timeout de 10 segundos
+                            await connection.query(
+                                'INSERT INTO users (id, name, email, password, picture) VALUES (?, ?, ?, ?, ?)', 
+                                [id, name, email, hashedPassword, picture]
                             );
-
-                            await Promise.race([insertPromise, timeoutPromise]);
 
                             return response.status(200).json({ message: 'Usuário criado com sucesso' });
                         } else {
@@ -63,7 +52,7 @@ export const UserController = {
                 return response.status(400).json({ message: 'Insira nome, email e senha.' });
             }
         } catch (error) {
-            console.error(error);
+            console.error('Erro ao criar usuário:', error);
             return response.status(500).json({ error: 'Erro no servidor, tente novamente mais tarde.' });
         } finally {
             if (connection) {
