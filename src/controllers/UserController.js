@@ -1,19 +1,16 @@
-import createConnection from '../database/connection.js'
-import { check } from './CheckController.js'
-import bcrypt from 'bcryptjs'
-import crypto from 'crypto'
+import createConnection from '../database/connection.js';
+import { check } from './CheckController.js';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 export const UserController = {
     async create(request, response) {
         let connection;
-        connection.query('ALTER TABLE users MODIFY COLUMN id VARCHAR(10);', (err) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve();
-        });
         try {
-            connection = await createConnection();
+            connection = await createConnection();  // Inicializa a conexão corretamente
+
+            // Alterar o tipo da coluna 'id' se necessário (mas não é recomendado fazer isso aqui)
+            await connection.query('ALTER TABLE users MODIFY COLUMN id VARCHAR(10);');
 
             const { name, email, password, picture } = request.body;
 
@@ -28,12 +25,11 @@ export const UserController = {
                     const regexSpace = /\s/;
 
                     if (regexName.test(name) && regexEmail.test(email) && !regexSpace.test(name)) {
-                        connection = await createConnection();
-
+                        
                         // Verificar se o email já está cadastrado
                         const existingEmail = await check('users', 'email', email);
                         if (existingEmail.length === 0) {
-                            const id = crypto.randomBytes(4).toString('HEX');
+                            const id = crypto.randomBytes(4).toString('hex'); // Use 'hex' para gerar um id hexadecimal
 
                             // Criptografar senha
                             const salt = await bcrypt.genSalt(10);
@@ -41,12 +37,16 @@ export const UserController = {
 
                             // Inserir novo usuário
                             const insertPromise = new Promise((resolve, reject) => {
-                                connection.query('INSERT INTO users (id, name, email, password, picture) VALUES (?, ?, ?, ?, ?)', [id, name, email, hashedPassword, picture], (err) => {
-                                    if (err) {
-                                        return reject(err);
+                                connection.query(
+                                    'INSERT INTO users (id, name, email, password, picture) VALUES (?, ?, ?, ?, ?)', 
+                                    [id, name, email, hashedPassword, picture],
+                                    (err) => {
+                                        if (err) {
+                                            return reject(err);
+                                        }
+                                        resolve();
                                     }
-                                    resolve();
-                                });
+                                );
                             });
 
                             const timeoutPromise = new Promise((_, reject) =>
