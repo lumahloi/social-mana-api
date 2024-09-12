@@ -6,7 +6,15 @@ import crypto from 'crypto'
 export const UserController = {
     async create(request, response) {
         let connection;
+        connection.query('ALTER TABLE users MODIFY COLUMN id VARCHAR(10);', (err) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve();
+        });
         try {
+            connection = await createConnection();
+
             const { name, email, password, picture } = request.body;
 
             if (name && email && password) {
