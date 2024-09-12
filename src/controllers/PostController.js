@@ -28,7 +28,7 @@ export const PostController = {
 
             // Pegar os posts com paginação
             const [posts] = await connection.execute(
-                `SELECT P.id, P.description, U.name, U.picture
+                `SELECT P.id, P.description, P.userid, U.name, U.picture
                  FROM posts AS P
                  INNER JOIN users AS U ON P.userid = U.id
                  ORDER BY P.id DESC
