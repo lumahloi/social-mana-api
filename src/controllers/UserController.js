@@ -1,11 +1,7 @@
-import createConnection from '../database/connection.js';
-import { check } from './CheckController.js';
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
-import dotenv from 'dotenv';
-
-// Certifique-se de que dotenv está configurado corretamente em outro lugar do seu código
-dotenv.config();
+import createConnection from '../database/connection.js'
+import { check } from './CheckController.js'
+import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 
 export const UserController = {
     async create(request, response) {
