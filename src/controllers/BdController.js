@@ -1,6 +1,6 @@
 import createConnection from '../database/connection.js';
 export const BdUserController = {
-    async create(response) {
+    async index(response) {
         let connection;
         try {
             connection = await createConnection();
