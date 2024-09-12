@@ -5,6 +5,7 @@ import { PostController } from './controllers/PostController.js';
 import { SessionController } from './controllers/SessionController.js';
 import { LikeController } from './controllers/LikeController.js';
 import { DislikeController } from './controllers/DislikeController.js';
+import { BdController } from './controllers/BdController.js';
 
 const routes = express.Router();
 
@@ -23,5 +24,7 @@ routes.delete('/likes/:postid', LikeController.delete);
 routes.get('/dislikes/:postid', DislikeController.index);
 routes.post('/dislikes/:postid', DislikeController.create);
 routes.delete('/dislikes/:postid', DislikeController.delete);
+
+routes.get('/bd', BdController.index)
 
 export default routes;
