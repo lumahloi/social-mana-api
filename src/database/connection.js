@@ -1,8 +1,7 @@
-import mysql from 'mysql2/promise';
-import dotenv from 'dotenv';
+import mysql from 'mysql2/promise'
+import dotenv from 'dotenv'
 
-// Carregar variáveis de ambiente
-dotenv.config();
+dotenv.config()
 
 const createConnection = async () => {
   try {
@@ -13,11 +12,11 @@ const createConnection = async () => {
       password: process.env.MYSQLPASSWORD,
       database: process.env.MYSQLDATABASE,
     });
-    return connection;
+    return connection
   } catch (err) {
-    console.error('Error connecting to the database:', err);
-    throw err;
+    console.error('Error connecting to the database:', err)
+    throw err
   }
 };
 
-export default createConnection;
+export default createConnection
