@@ -17,9 +17,9 @@ export const PostController = {
                 return response.status(400).json({ error: 'Usuário não encontrado.' });
             }
 
-            const page = parseInt(request.query.page, 10) || 1
+            const page = parseInt(request.query.page, 10) || 1;
             const offset = (page - 1) * 15;
-            const postQt = 15
+            const postQt = 15;
             connection = await createConnection();
 
             // Contar o número total de posts
@@ -32,9 +32,8 @@ export const PostController = {
                  FROM posts AS P
                  INNER JOIN users AS U ON P.userid = U.id
                  ORDER BY P.id DESC
-                 LIMIT ? OFFSET ?`, 
-                [postQt, offset] // Passar o valor de LIMIT e OFFSET separadamente
-            );            
+                 LIMIT ${postQt} OFFSET ${offset}` // Inserir diretamente os valores de LIMIT e OFFSET
+            );
 
             response.header('X-Total-Count', count);
             return response.json(posts);
