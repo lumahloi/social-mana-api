@@ -61,7 +61,7 @@ export const PostController = {
         try {
             const userCheck = await check('users', 'id', userid)
 
-            if (!userCheck) {
+            if (userCheck.length == 0) {
                 return response.status(400).json({ error: 'Usuário não encontrado.' })
             }
 
@@ -89,11 +89,11 @@ export const PostController = {
             const userCheck = await check('users', 'id', userid)
             const postCheck = await check('posts', 'id', id)
 
-            if (!userCheck) {
+            if (userCheck.length == 0) {
                 return response.status(400).json({ error: 'Usuário não encontrado.' })
             }
 
-            if (!postCheck) {
+            if (postCheck.length == 0) {
                 return response.status(400).json({ error: 'Post não encontrado.' })
             }
 
@@ -102,6 +102,8 @@ export const PostController = {
             }
 
             connection = await createConnection()
+            await connection.execute("DELETE FROM likes WHERE postid = ?", [id]);
+            await connection.execute("DELETE FROM dislikes WHERE postid = ?", [id]);
             await connection.execute("DELETE FROM posts WHERE id = ?", [id])
 
             return response.status(200).json({ message: 'Post deletado com sucesso.' })

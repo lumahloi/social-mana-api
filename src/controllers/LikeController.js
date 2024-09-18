@@ -18,7 +18,7 @@ export const LikeController = {
             const userCheck = await check('users', 'id', userid)
             const postCheck = await check('posts', 'id', postid)
 
-            if (userCheck && postCheck) {
+            if (userCheck.length != 0 && postCheck.length != 0) {
                 // Contar likes
                 const [likeCountRows] = await connection.execute(
                     "SELECT COUNT(id) AS count FROM likes WHERE postid = ?", [postid]
@@ -59,7 +59,7 @@ export const LikeController = {
             const userCheck = await check('users', 'id', userid)
             const postCheck = await check('posts', 'id', postid)
 
-            if (userCheck && postCheck) {
+            if (userCheck.length != 0 && postCheck.length != 0) {
                 // Verificar se o usuário já deu like ou dislike
                 const [likeRows] = await connection.execute(
                     "SELECT * FROM likes WHERE postid = ? AND userid = ?", [postid, userid]
@@ -108,7 +108,7 @@ export const LikeController = {
             const userCheck = await check('users', 'id', userid)
             const postCheck = await check('posts', 'id', postid)
 
-            if (userCheck && postCheck) {
+            if (userCheck.length != 0 && postCheck.length != 0) {
                 // Verificar se o usuário deu like
                 const [likeRows] = await connection.execute(
                     "SELECT * FROM likes WHERE userid = ? AND postid = ?", [userid, postid]

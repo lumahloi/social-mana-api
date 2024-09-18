@@ -18,7 +18,7 @@ export const DislikeController = {
             const userCheck = await check('users', 'id', userid)
             const postCheck = await check('posts', 'id', postid)
 
-            if (userCheck && postCheck) {
+            if (userCheck.length != 0 && postCheck.length != 0) {
                 // Contar dislikes
                 const [dislikeCountRows] = await connection.execute(
                     "SELECT COUNT(id) AS count FROM dislikes WHERE postid = ?", [postid]
@@ -59,7 +59,7 @@ export const DislikeController = {
             const userCheck = await check('users', 'id', userid)
             const postCheck = await check('posts', 'id', postid)
 
-            if (userCheck && postCheck) {
+            if (userCheck.length != 0 && postCheck.length != 0) {
                 // Verificar se o usuário já deu dislike
                 const [dislikeRows] = await connection.execute(
                     "SELECT * FROM dislikes WHERE postid = ? AND userid = ?", [postid, userid]
@@ -109,7 +109,7 @@ export const DislikeController = {
             const userCheck = await check('users', 'id', userid)
             const postCheck = await check('posts', 'id', postid)
 
-            if (userCheck && postCheck) {
+            if (userCheck.length != 0 && postCheck.length != 0) {
                 // Verificar se o usuário deu dislike
                 const [dislikeRows] = await connection.execute(
                     "SELECT * FROM dislikes WHERE userid = ? AND postid = ?", [userid, postid]
